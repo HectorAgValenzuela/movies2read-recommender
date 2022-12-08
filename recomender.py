@@ -21,7 +21,9 @@ moovieData = pd.read_csv("Movie_P_Path.csv")
 bookData = pd.read_csv("Book_P_Path.csv")
 bookDataParse = bookData["Tags"].values.astype('U')
 
-
+        
+nweTfidf = joblib.load("./TFIDF_MODEL_PATH.pkl") 
+tfidf_recipe = joblib.load("./TFIDF_ENCODING_PATH.pkl")
 
 def get_recommendations(N, scores ):
     # order the scores with and filter to get the highest N scores
@@ -33,14 +35,6 @@ def get_recommendations(N, scores ):
         df_recipes.iloc[top].values[:N].tolist())
 
 def Recomendar(movieID):
-    
-    nweTfidf = TfidfVectorizer() 
-    tfidf_recipe = nweTfidf.fit_transform(bookDataParse)
-
-    with open("TFIDF_MODEL_PATH.pkl", "wb") as f:
-        pickle.dump(nweTfidf, f)
-    with open("TFIDF_ENCODING_PATH.pkl", "wb") as f:
-        pickle.dump(tfidf_recipe, f)
     
 
     movies_tfidf = nweTfidf.transform(moovieData[ moovieData["item_id"] == int(movieID)]["Tags"])
