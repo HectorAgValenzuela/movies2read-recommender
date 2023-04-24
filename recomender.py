@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import pickle
-
+import Prepross
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from flask_cors import CORS
@@ -50,6 +50,7 @@ class status (Resource):
         except:
             return {'data': 'An Error Occurred during fetching Api'}
 
+
 class Recommender(Resource):
     def get(self):
         books = request.args.get('books')
@@ -57,11 +58,44 @@ class Recommender(Resource):
         return jsonify({'data': Recomendar(books)})
             
 
+#api.add_resource(status, '/')
+#api.add_resource(Recommender, '/recommender')
+
+Recomendar("1")
+
+if __name__ == '__main__':
+       # Apply the PreProcess functions to the dataset
+   dataDF = Prepross.importData("data\megaGymDataset.csv")
+   print("Before: " + str(dataDF.shape))
+   dataDF = Prepross.filldummyRating(dataDF)
+   dataDF = Prepross.filldummyRating(dataDF)
+   print("After: " + str(dataDF.shape))
+   dataDF = Prepross.addScoreAndTotalRatings(dataDF)
+   dataDF = Prepross.addWeightedRating(dataDF)
+   dataDF = Prepross.formatColumns(dataDF)
+   print("After: " + str(dataDF.shape))
+
+   
+   #Export the processed data to a csv file
+   dataDF.to_csv('data\cleanedData.csv', index=False)
+   
+   # create an object for TfidfVectorizer
+   tfidfVector = TfidfVectorizer(stop_words='english')
+
+   # convert the list of documents (rows of features) into a matrix
+   tfidfMatrix = tfidfVector.fit_transform(dataDF['merged'])
+   print(tfidfMatrix.shape)
+   # create the cosine similarity matrix
+   sim_matrix = cosine_similarity(tfidfMatrix,tfidfMatrix)\
+      
+   print(sim_matrix.shape)
+   print(sim_matrix)
+   
+
+
 api.add_resource(status, '/')
 api.add_resource(Recommender, '/recommender')
 
 Recomendar("1")
 
-if __name__ == '__main__':
-
-    app.run()
+app.run()
